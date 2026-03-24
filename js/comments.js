@@ -1,9 +1,8 @@
 const comments = {
-    // Открыть модальное окно
-    openModal: function(linkId) {
+    async openModal(linkId) {
         app.currentLinkId = linkId;
-        const linksData = JSON.parse(localStorage.getItem('links'));
-        const link = linksData.find(l => l.id === linkId);
+        const data = await app.loadData();
+        const link = data.links.find(l => l.id === linkId);
         
         const commentsList = document.getElementById('commentsList');
         commentsList.innerHTML = '';
@@ -21,8 +20,7 @@ const comments = {
         document.getElementById('newComment').value = '';
     },
     
-    // Создание элемента комментария
-    createCommentElement: function(comment, linkId) {
+    createCommentElement(comment, linkId) {
         const commentDiv = document.createElement('div');
         commentDiv.className = 'comment-item';
         
@@ -40,8 +38,7 @@ const comments = {
         return commentDiv;
     },
     
-    // Добавить комментарий
-    addComment: function() {
+    async addComment() {
         const commentText = document.getElementById('newComment').value.trim();
         
         if (!commentText) {
@@ -49,52 +46,58 @@ const comments = {
             return;
         }
         
-        const linksData = JSON.parse(localStorage.getItem('links'));
-        const linkIndex = linksData.findIndex(l => l.id === app.currentLinkId);
+        const data = await app.loadData();
+        const linkIndex = data.links.findIndex(l => l.id === app.currentLinkId);
         
-        if (!linksData[linkIndex].comments) {
-            linksData[linkIndex].comments = [];
+        if (!data.links[linkIndex].comments) {
+            data.links[linkIndex].comments = [];
         }
         
-        linksData[linkIndex].comments.push({
+        data.links[linkIndex].comments.push({
             author: app.currentUser,
             text: this.escapeHtml(commentText),
             date: new Date().toISOString()
         });
         
-        localStorage.setItem('links', JSON.stringify(linksData));
-        this.openModal(app.currentLinkId);
-        app.updateStats();
+        const success = await app.saveData(data);
+        
+        if (success) {
+            await this.openModal(app.currentLinkId);
+            app.updateStats(data);
+        } else {
+            alert('Ошибка добавления комментария');
+        }
     },
     
-    // Удалить комментарий
-    deleteComment: function(linkId, commentDate) {
+    async deleteComment(linkId, commentDate) {
         if (!confirm('Удалить этот комментарий?')) return;
         
-        const linksData = JSON.parse(localStorage.getItem('links'));
-        const linkIndex = linksData.findIndex(l => l.id === linkId);
-        const comment = linksData[linkIndex].comments.find(c => c.date === commentDate);
+        const data = await app.loadData();
+        const linkIndex = data.links.findIndex(l => l.id === linkId);
+        const comment = data.links[linkIndex].comments.find(c => c.date === commentDate);
         
-        // Проверка прав
         if (comment.author !== app.currentUser && !app.isModerator()) {
             alert('Вы можете удалять только свои комментарии');
             return;
         }
         
-        linksData[linkIndex].comments = linksData[linkIndex].comments.filter(c => c.date !== commentDate);
-        localStorage.setItem('links', JSON.stringify(linksData));
-        this.openModal(linkId);
-        app.updateStats();
+        data.links[linkIndex].comments = data.links[linkIndex].comments.filter(c => c.date !== commentDate);
+        const success = await app.saveData(data);
+        
+        if (success) {
+            await this.openModal(linkId);
+            app.updateStats(data);
+        } else {
+            alert('Ошибка удаления комментария');
+        }
     },
     
-    // Закрыть модальное окно
-    closeModal: function() {
+    closeModal() {
         document.getElementById('commentsModal').style.display = 'none';
         app.currentLinkId = null;
     },
     
-    // Защита от XSS
-    escapeHtml: function(text) {
+    escapeHtml(text) {
         const div = document.createElement('div');
         div.textContent = text;
         return div.innerHTML;
