@@ -6,26 +6,5 @@
       "registeredAt": "2024-01-01T00:00:00.000Z"
     }
   },
-  "links": [
-    {
-      "id": "1",
-      "title": "GitHub",
-      "description": "Платформа для хостинга IT-проектов",
-      "url": "https://github.com",
-      "category": "разработка",
-      "author": "AlekseyNaruto",
-      "createdAt": "2024-01-01T00:00:00.000Z",
-      "comments": []
-    },
-    {
-      "id": "2",
-      "title": "MDN Web Docs",
-      "description": "Документация по веб-технологиям",
-      "url": "https://developer.mozilla.org",
-      "category": "учеба",
-      "author": "AlekseyNaruto",
-      "createdAt": "2024-01-01T00:00:00.000Z",
-      "comments": []
-    }
-  ]
+  "links": []
 }
