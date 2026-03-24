@@ -1,23 +1,133 @@
 <!DOCTYPE html>
-<html>
-<head><title>Test API</title></head>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LinkManager Pro</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
 <body>
-    <h1>Тест GitHub API</h1>
-    <button onclick="test()">Проверить</button>
-    <pre id="result"></pre>
-    
+    <!-- Форма входа/регистрации -->
+    <div id="authContainer" class="auth-container">
+        <div class="auth-card">
+            <div class="logo">📁 LinkManager Pro</div>
+            
+            <div id="loginForm" class="auth-form active">
+                <h2>Вход</h2>
+                <input type="text" id="loginUsername" placeholder="Имя пользователя">
+                <input type="password" id="loginPassword" placeholder="Пароль">
+                <button onclick="auth.login()">Войти</button>
+                <p>Нет аккаунта? <a href="#" onclick="auth.showRegister()">Регистрация</a></p>
+            </div>
+
+            <div id="registerForm" class="auth-form">
+                <h2>Регистрация</h2>
+                <input type="text" id="regUsername" placeholder="Имя пользователя">
+                <input type="password" id="regPassword" placeholder="Пароль">
+                <input type="password" id="regConfirmPassword" placeholder="Подтвердите пароль">
+                <button onclick="auth.register()">Зарегистрироваться</button>
+                <p>Уже есть аккаунт? <a href="#" onclick="auth.showLogin()">Вход</a></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Основной интерфейс -->
+    <div id="mainContainer" class="main-container" style="display: none;">
+        <header class="header">
+            <div class="logo">📁 LinkManager Pro</div>
+            <div class="user-info">
+                <span id="currentUser"></span>
+                <span id="moderatorBadge" class="badge" style="display: none;">👑 Модератор</span>
+                <button onclick="auth.openPasswordModal()" class="btn-change">🔑 Сменить пароль</button>
+                <button onclick="auth.logout()" class="btn-logout">Выйти</button>
+            </div>
+        </header>
+
+        <div class="container">
+            <!-- Статистика -->
+            <div class="stats">
+                <div class="stat-card">
+                    <span>📊</span>
+                    <div>
+                        <h3 id="totalLinks">0</h3>
+                        <p>Ссылок</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <span>💬</span>
+                    <div>
+                        <h3 id="totalComments">0</h3>
+                        <p>Комментариев</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <span>👥</span>
+                    <div>
+                        <h3 id="totalUsers">0</h3>
+                        <p>Пользователей</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Добавление ссылки -->
+            <div class="add-card">
+                <h3>➕ Добавить ссылку</h3>
+                <input type="text" id="linkTitle" placeholder="Название">
+                <textarea id="linkDescription" placeholder="Описание"></textarea>
+                <input type="url" id="linkUrl" placeholder="URL (https://...)">
+                <input type="text" id="linkCategory" placeholder="Категория">
+                <button onclick="links.addLink()">Добавить</button>
+            </div>
+
+            <!-- Категории -->
+            <div class="filters">
+                <h3>📂 Категории</h3>
+                <div id="categoriesList" class="categories"></div>
+            </div>
+
+            <!-- Ссылки -->
+            <div id="linksGrid" class="links-grid"></div>
+        </div>
+    </div>
+
+    <!-- Модальное окно комментариев -->
+    <div id="commentsModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>💬 Комментарии</h3>
+                <span onclick="comments.closeModal()">&times;</span>
+            </div>
+            <div id="commentsList" class="comments-list"></div>
+            <textarea id="newComment" placeholder="Ваш комментарий..."></textarea>
+            <button onclick="comments.addComment()">Отправить</button>
+        </div>
+    </div>
+
+    <!-- Модальное окно смены пароля -->
+    <div id="passwordModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>🔐 Смена пароля</h3>
+                <span onclick="auth.closePasswordModal()">&times;</span>
+            </div>
+            <input type="password" id="oldPassword" placeholder="Старый пароль">
+            <input type="password" id="newPassword" placeholder="Новый пароль">
+            <input type="password" id="confirmNewPassword" placeholder="Подтвердите пароль">
+            <button onclick="auth.changePassword()">Изменить</button>
+        </div>
+    </div>
+
     <script src="js/config.js"></script>
+    <script src="js/github-api.js"></script>
+    <script src="js/app.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/links.js"></script>
+    <script src="js/comments.js"></script>
+    <script src="js/moderator.js"></script>
     <script>
-    async function test() {
-        const url = `https://api.github.com/repos/${window.GITHUB_OWNER}/${window.GITHUB_REPO}`;
-        const response = await fetch(url, {
-            headers: {
-                'Authorization': `token ${window.GITHUB_TOKEN}`
-            }
+        document.addEventListener('DOMContentLoaded', () => {
+            app.init();
         });
-        const data = await response.json();
-        document.getElementById('result').textContent = JSON.stringify(data, null, 2);
-    }
     </script>
 </body>
 </html>
