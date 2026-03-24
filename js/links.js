@@ -1,6 +1,6 @@
 const links = {
     // Добавление ссылки
-    addLink: function() {
+    async addLink() {
         const title = document.getElementById('linkTitle').value.trim();
         const description = document.getElementById('linkDescription').value.trim();
         const url = document.getElementById('linkUrl').value.trim();
@@ -16,7 +16,8 @@ const links = {
             return;
         }
         
-        const linksData = JSON.parse(localStorage.getItem('links'));
+        const data = await app.loadData();
+        
         const newLink = {
             id: Date.now().toString(),
             title: this.escapeHtml(title),
@@ -28,49 +29,56 @@ const links = {
             comments: []
         };
         
-        linksData.push(newLink);
-        localStorage.setItem('links', JSON.stringify(linksData));
+        data.links.push(newLink);
+        const success = await app.saveData(data);
         
-        // Очистка формы
-        document.getElementById('linkTitle').value = '';
-        document.getElementById('linkDescription').value = '';
-        document.getElementById('linkUrl').value = '';
-        document.getElementById('linkCategory').value = '';
-        
-        this.loadLinks();
-        this.loadCategories();
-        app.updateStats();
-        alert('Ссылка добавлена!');
+        if (success) {
+            document.getElementById('linkTitle').value = '';
+            document.getElementById('linkDescription').value = '';
+            document.getElementById('linkUrl').value = '';
+            document.getElementById('linkCategory').value = '';
+            
+            await this.loadLinks();
+            await this.loadCategories();
+            app.updateStats(data);
+            alert('Ссылка добавлена!');
+        } else {
+            alert('Ошибка добавления ссылки');
+        }
     },
     
     // Удаление ссылки
-    deleteLink: function(linkId) {
-        const linksData = JSON.parse(localStorage.getItem('links'));
-        const link = linksData.find(l => l.id === linkId);
+    async deleteLink(linkId) {
+        const data = await app.loadData();
+        const link = data.links.find(l => l.id === linkId);
         
-        // Проверка прав: автор или модератор
         if (link.author !== app.currentUser && !app.isModerator()) {
             alert('Вы можете удалять только свои ссылки');
             return;
         }
         
         if (confirm('Удалить эту ссылку?')) {
-            const updatedLinks = linksData.filter(l => l.id !== linkId);
-            localStorage.setItem('links', JSON.stringify(updatedLinks));
-            this.loadLinks();
-            this.loadCategories();
-            app.updateStats();
-            alert('Ссылка удалена');
+            data.links = data.links.filter(l => l.id !== linkId);
+            const success = await app.saveData(data);
+            
+            if (success) {
+                await this.loadLinks();
+                await this.loadCategories();
+                app.updateStats(data);
+                alert('Ссылка удалена');
+            } else {
+                alert('Ошибка удаления');
+            }
         }
     },
     
     // Загрузка ссылок
-    loadLinks: function(filterCategory = app.currentFilter) {
-        const linksData = JSON.parse(localStorage.getItem('links'));
-        let filteredLinks = linksData;
+    async loadLinks(filterCategory = app.currentFilter) {
+        const data = await app.loadData();
+        let filteredLinks = data.links || [];
         
         if (filterCategory !== 'all') {
-            filteredLinks = linksData.filter(l => l.category === filterCategory);
+            filteredLinks = filteredLinks.filter(l => l.category === filterCategory);
         }
         
         const linksGrid = document.getElementById('linksGrid');
@@ -87,8 +95,7 @@ const links = {
         });
     },
     
-    // Создание карточки ссылки
-    createLinkCard: function(link) {
+    createLinkCard(link) {
         const card = document.createElement('div');
         card.className = 'link-card';
         
@@ -105,7 +112,7 @@ const links = {
                 <div class="link-url">🔗 ${this.shortenUrl(link.url)}</div>
                 <div class="link-meta">
                     <span class="link-author">
-                        👤 <span class="author-badge">${link.author}</span>
+                        👤 ${link.author}
                         ${link.author === 'AlekseyNaruto' ? '<span class="moderator-badge">⭐ Модератор</span>' : ''}
                     </span>
                     <span>📅 ${new Date(link.createdAt).toLocaleDateString()}</span>
@@ -122,10 +129,9 @@ const links = {
         return card;
     },
     
-    // Загрузка категорий
-    loadCategories: function() {
-        const linksData = JSON.parse(localStorage.getItem('links'));
-        const categories = ['all', ...new Set(linksData.map(l => l.category))];
+    async loadCategories() {
+        const data = await app.loadData();
+        const categories = ['all', ...new Set(data.links.map(l => l.category))];
         
         const categoriesDiv = document.getElementById('categoriesList');
         categoriesDiv.innerHTML = '';
@@ -133,8 +139,7 @@ const links = {
         categories.forEach(cat => {
             const chip = document.createElement('div');
             chip.className = 'category-chip';
-            if (cat === 'all') chip.textContent = 'Все';
-            else chip.textContent = cat;
+            chip.textContent = cat === 'all' ? 'Все' : cat;
             
             if (app.currentFilter === cat) {
                 chip.classList.add('active');
@@ -151,28 +156,24 @@ const links = {
         });
     },
     
-    // Сброс фильтра
-    showAllCategories: function() {
+    showAllCategories() {
         app.currentFilter = 'all';
         this.loadLinks('all');
         this.loadCategories();
     },
     
-    // Открыть ссылку
-    openLink: function(url) {
+    openLink(url) {
         window.open(url, '_blank');
     },
     
-    // Сокращение URL для отображения
-    shortenUrl: function(url) {
+    shortenUrl(url) {
         if (url.length > 50) {
             return url.substring(0, 47) + '...';
         }
         return url;
     },
     
-    // Защита от XSS
-    escapeHtml: function(text) {
+    escapeHtml(text) {
         const div = document.createElement('div');
         div.textContent = text;
         return div.innerHTML;
