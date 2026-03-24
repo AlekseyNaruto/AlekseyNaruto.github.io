@@ -1,8 +1,7 @@
 const links = {
-    // Добавление ссылки
     async addLink() {
         const title = document.getElementById('linkTitle').value.trim();
-        const description = document.getElementById('linkDescription').value.trim();
+        const desc = document.getElementById('linkDescription').value.trim();
         const url = document.getElementById('linkUrl').value.trim();
         const category = document.getElementById('linkCategory').value.trim() || 'без категории';
         
@@ -18,18 +17,17 @@ const links = {
         
         const data = await app.loadData();
         
-        const newLink = {
+        data.links.push({
             id: Date.now().toString(),
             title: this.escapeHtml(title),
-            description: this.escapeHtml(description),
+            description: this.escapeHtml(desc),
             url: url,
             category: this.escapeHtml(category),
             author: app.currentUser,
             createdAt: new Date().toISOString(),
             comments: []
-        };
+        });
         
-        data.links.push(newLink);
         const success = await app.saveData(data);
         
         if (success) {
@@ -41,23 +39,24 @@ const links = {
             await this.loadLinks();
             await this.loadCategories();
             app.updateStats(data);
-            alert('Ссылка добавлена!');
+            alert('✅ Ссылка добавлена!');
         } else {
-            alert('Ошибка добавления ссылки');
+            alert('❌ Ошибка добавления');
         }
     },
     
-    // Удаление ссылки
     async deleteLink(linkId) {
         const data = await app.loadData();
         const link = data.links.find(l => l.id === linkId);
         
+        if (!link) return;
+        
         if (link.author !== app.currentUser && !app.isModerator()) {
-            alert('Вы можете удалять только свои ссылки');
+            alert('Удалять можно только свои ссылки');
             return;
         }
         
-        if (confirm('Удалить эту ссылку?')) {
+        if (confirm('Удалить ссылку?')) {
             data.links = data.links.filter(l => l.id !== linkId);
             const success = await app.saveData(data);
             
@@ -65,37 +64,35 @@ const links = {
                 await this.loadLinks();
                 await this.loadCategories();
                 app.updateStats(data);
-                alert('Ссылка удалена');
-            } else {
-                alert('Ошибка удаления');
+                alert('✅ Ссылка удалена');
             }
         }
     },
     
-    // Загрузка ссылок
     async loadLinks(filterCategory = app.currentFilter) {
         const data = await app.loadData();
-        let filteredLinks = data.links || [];
+        if (!data) return;
+        
+        let filtered = data.links || [];
         
         if (filterCategory !== 'all') {
-            filteredLinks = filteredLinks.filter(l => l.category === filterCategory);
+            filtered = filtered.filter(l => l.category === filterCategory);
         }
         
-        const linksGrid = document.getElementById('linksGrid');
-        linksGrid.innerHTML = '';
+        const grid = document.getElementById('linksGrid');
+        grid.innerHTML = '';
         
-        if (filteredLinks.length === 0) {
-            linksGrid.innerHTML = '<div style="text-align: center; padding: 50px; background: white; border-radius: 15px;">📭 Нет ссылок в этой категории</div>';
+        if (filtered.length === 0) {
+            grid.innerHTML = '<div class="empty-state">📭 Нет ссылок</div>';
             return;
         }
         
-        filteredLinks.reverse().forEach(link => {
-            const card = this.createLinkCard(link);
-            linksGrid.appendChild(card);
+        filtered.reverse().forEach(link => {
+            grid.appendChild(this.createCard(link));
         });
     },
     
-    createLinkCard(link) {
+    createCard(link) {
         const card = document.createElement('div');
         card.className = 'link-card';
         
@@ -104,24 +101,21 @@ const links = {
         
         card.innerHTML = `
             <div class="link-preview">
-                <iframe src="${link.url}" sandbox="allow-same-origin allow-scripts allow-popups allow-forms" loading="lazy"></iframe>
+                <iframe src="${link.url}" sandbox="allow-same-origin allow-scripts" loading="lazy"></iframe>
             </div>
             <div class="link-content">
                 <div class="link-title">${link.title}</div>
                 <div class="link-description">${link.description || '📝 Нет описания'}</div>
                 <div class="link-url">🔗 ${this.shortenUrl(link.url)}</div>
                 <div class="link-meta">
-                    <span class="link-author">
-                        👤 ${link.author}
-                        ${link.author === 'AlekseyNaruto' ? '<span class="moderator-badge">⭐ Модератор</span>' : ''}
-                    </span>
+                    <span>👤 ${link.author} ${link.author === 'AlekseyNaruto' ? '⭐' : ''}</span>
                     <span>📅 ${new Date(link.createdAt).toLocaleDateString()}</span>
                     <span>🏷️ ${link.category}</span>
                 </div>
                 <div class="link-actions">
-                    <button class="btn-view" onclick="links.openLink('${link.url}')">🔗 Открыть</button>
-                    <button class="btn-comment" onclick="comments.openModal('${link.id}')">💬 ${link.comments?.length || 0}</button>
-                    ${canDelete ? `<button class="btn-delete" onclick="links.deleteLink('${link.id}')">🗑️ Удалить</button>` : ''}
+                    <button onclick="links.openLink('${link.url}')">🔗 Открыть</button>
+                    <button onclick="comments.openModal('${link.id}')">💬 ${link.comments?.length || 0}</button>
+                    ${canDelete ? `<button class="delete" onclick="links.deleteLink('${link.id}')">🗑️</button>` : ''}
                 </div>
             </div>
         `;
@@ -131,19 +125,18 @@ const links = {
     
     async loadCategories() {
         const data = await app.loadData();
+        if (!data) return;
+        
         const categories = ['all', ...new Set(data.links.map(l => l.category))];
         
-        const categoriesDiv = document.getElementById('categoriesList');
-        categoriesDiv.innerHTML = '';
+        const container = document.getElementById('categoriesList');
+        container.innerHTML = '';
         
         categories.forEach(cat => {
             const chip = document.createElement('div');
             chip.className = 'category-chip';
             chip.textContent = cat === 'all' ? 'Все' : cat;
-            
-            if (app.currentFilter === cat) {
-                chip.classList.add('active');
-            }
+            if (app.currentFilter === cat) chip.classList.add('active');
             
             chip.onclick = () => {
                 document.querySelectorAll('.category-chip').forEach(c => c.classList.remove('active'));
@@ -152,7 +145,7 @@ const links = {
                 this.loadLinks(cat);
             };
             
-            categoriesDiv.appendChild(chip);
+            container.appendChild(chip);
         });
     },
     
@@ -167,10 +160,7 @@ const links = {
     },
     
     shortenUrl(url) {
-        if (url.length > 50) {
-            return url.substring(0, 47) + '...';
-        }
-        return url;
+        return url.length > 50 ? url.substring(0, 47) + '...' : url;
     },
     
     escapeHtml(text) {
