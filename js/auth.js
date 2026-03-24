@@ -1,5 +1,4 @@
 const auth = {
-    // Вход
     async login() {
         const username = document.getElementById('loginUsername').value.trim();
         const password = document.getElementById('loginPassword').value;
@@ -13,7 +12,7 @@ const auth = {
             
             document.getElementById('authContainer').style.display = 'none';
             document.getElementById('mainContainer').style.display = 'block';
-            document.getElementById('currentUserName').textContent = username;
+            document.getElementById('currentUser').textContent = `👤 ${username}`;
             
             if (username === app.moderatorName) {
                 document.getElementById('moderatorBadge').style.display = 'inline-block';
@@ -23,22 +22,21 @@ const auth = {
             await links.loadCategories();
             app.updateStats(data);
         } else {
-            alert('Неверное имя пользователя или пароль');
+            alert('Неверное имя или пароль');
         }
     },
     
-    // Регистрация
     async register() {
         const username = document.getElementById('regUsername').value.trim();
         const password = document.getElementById('regPassword').value;
-        const confirmPassword = document.getElementById('regConfirmPassword').value;
+        const confirm = document.getElementById('regConfirmPassword').value;
         
         if (!username || !password) {
             alert('Заполните все поля');
             return;
         }
         
-        if (password !== confirmPassword) {
+        if (password !== confirm) {
             alert('Пароли не совпадают');
             return;
         }
@@ -59,74 +57,54 @@ const auth = {
         const success = await app.saveData(data);
         
         if (success) {
-            alert('Регистрация успешна! Теперь войдите');
+            alert('Регистрация успешна!');
             this.showLogin();
         } else {
             alert('Ошибка регистрации');
         }
     },
     
-    // Смена пароля
     async changePassword() {
-        const oldPassword = document.getElementById('oldPassword').value;
-        const newPassword = document.getElementById('newPassword').value;
-        const confirmNewPassword = document.getElementById('confirmNewPassword').value;
+        const oldPass = document.getElementById('oldPassword').value;
+        const newPass = document.getElementById('newPassword').value;
+        const confirmPass = document.getElementById('confirmNewPassword').value;
         
-        if (!oldPassword || !newPassword || !confirmNewPassword) {
+        if (!oldPass || !newPass || !confirmPass) {
             alert('Заполните все поля');
             return;
         }
         
-        if (newPassword !== confirmNewPassword) {
-            alert('Новый пароль и подтверждение не совпадают');
-            return;
-        }
-        
-        if (newPassword.length < 4) {
-            alert('Новый пароль должен содержать минимум 4 символа');
+        if (newPass !== confirmPass) {
+            alert('Пароли не совпадают');
             return;
         }
         
         const data = await app.loadData();
         const user = data.users[app.currentUser];
         
-        if (atob(user.password) !== oldPassword) {
+        if (atob(user.password) !== oldPass) {
             alert('Неверный старый пароль');
             return;
         }
         
-        user.password = btoa(newPassword);
+        user.password = btoa(newPass);
         const success = await app.saveData(data);
         
         if (success) {
-            alert('Пароль успешно изменён!');
+            alert('Пароль изменён');
             this.closePasswordModal();
             document.getElementById('oldPassword').value = '';
             document.getElementById('newPassword').value = '';
             document.getElementById('confirmNewPassword').value = '';
-        } else {
-            alert('Ошибка смены пароля');
         }
     },
     
-    openPasswordModal() {
-        document.getElementById('passwordModal').style.display = 'flex';
-    },
-    
-    closePasswordModal() {
-        document.getElementById('passwordModal').style.display = 'none';
-    },
-    
-    // Выход
     logout() {
         app.currentUser = null;
         sessionStorage.removeItem('currentUser');
         document.getElementById('authContainer').style.display = 'flex';
         document.getElementById('mainContainer').style.display = 'none';
         document.getElementById('moderatorBadge').style.display = 'none';
-        
-        document.getElementById('loginUsername').value = '';
-        document.getElementById('loginPassword').value = '';
     },
     
     showLogin() {
@@ -139,6 +117,14 @@ const auth = {
         document.getElementById('loginForm').classList.remove('active');
     },
     
+    openPasswordModal() {
+        document.getElementById('passwordModal').style.display = 'flex';
+    },
+    
+    closePasswordModal() {
+        document.getElementById('passwordModal').style.display = 'none';
+    },
+    
     async checkAuth() {
         const savedUser = sessionStorage.getItem('currentUser');
         if (savedUser) {
@@ -147,7 +133,7 @@ const auth = {
                 app.currentUser = savedUser;
                 document.getElementById('authContainer').style.display = 'none';
                 document.getElementById('mainContainer').style.display = 'block';
-                document.getElementById('currentUserName').textContent = savedUser;
+                document.getElementById('currentUser').textContent = `👤 ${savedUser}`;
                 
                 if (savedUser === app.moderatorName) {
                     document.getElementById('moderatorBadge').style.display = 'inline-block';
@@ -156,8 +142,6 @@ const auth = {
                 await links.loadLinks();
                 await links.loadCategories();
                 app.updateStats(data);
-            } else {
-                sessionStorage.removeItem('currentUser');
             }
         }
     }
