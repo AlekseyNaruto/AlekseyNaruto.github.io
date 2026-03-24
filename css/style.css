@@ -1,34 +1,298 @@
-body {
-    font-family: Arial, sans-serif;
+/* ==================== */
+/* Глобальные стили     */
+/* ==================== */
+
+* {
     margin: 0;
     padding: 0;
-    background: #f4f4f4;
+    box-sizing: border-box;
 }
 
-nav {
-    background: #333;
-    padding: 1rem;
+body {
+    font-family: 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    color: #333;
 }
 
-nav a {
-    color: white;
-    text-decoration: none;
-    margin-right: 1rem;
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
 }
 
-nav a:hover {
-    color: #667eea;
+/* ==================== */
+/* Шапка сайта          */
+/* ==================== */
+
+.header {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+    padding: 20px 0;
+    text-align: center;
 }
 
-main {
-    max-width: 800px;
-    margin: 2rem auto;
-    padding: 2rem;
+.header h1 {
+    font-size: 2rem;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 8px;
+}
+
+.header p {
+    color: #666;
+    font-size: 1rem;
+}
+
+/* ==================== */
+/* Основной контент     */
+/* ==================== */
+
+.main {
+    padding: 40px 0;
+}
+
+/* Карточка статуса */
+.status-card {
     background: white;
-    border-radius: 5px;
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    animation: slideDown 0.5s ease-out;
 }
 
-img {
-    max-width: 100%;
-    height: auto;
+.status-icon {
+    font-size: 2.5rem;
+    width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f0f0f0;
+    border-radius: 50%;
+}
+
+.status-text {
+    flex: 1;
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: #555;
+}
+
+.coordinates {
+    font-family: 'Courier New', monospace;
+    background: #f5f5f5;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    color: #667eea;
+    font-weight: bold;
+}
+
+/* Контейнер карты */
+.map-container {
+    background: #f0f0f0;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    margin-bottom: 24px;
+    position: relative;
+}
+
+#map {
+    width: 100%;
+    height: 500px;
+    background: #e0e0e0;
+}
+
+/* Группа кнопок */
+.button-group {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    margin-bottom: 32px;
+    flex-wrap: wrap;
+}
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 28px;
+    font-size: 1rem;
+    font-weight: 600;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.btn-icon {
+    font-size: 1.2rem;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+}
+
+.btn-secondary {
+    background: white;
+    color: #667eea;
+    border: 2px solid #667eea;
+}
+
+.btn-secondary:hover {
+    background: #667eea;
+    color: white;
+    transform: translateY(-2px);
+}
+
+/* Информационная карточка */
+.info-card {
+    background: white;
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.info-card h3 {
+    color: #667eea;
+    margin-bottom: 16px;
+    font-size: 1.3rem;
+}
+
+.info-card ul {
+    list-style: none;
+    padding-left: 0;
+}
+
+.info-card li {
+    padding: 8px 0;
+    padding-left: 28px;
+    position: relative;
+}
+
+.info-card li::before {
+    content: "✓";
+    color: #667eea;
+    font-weight: bold;
+    position: absolute;
+    left: 0;
+}
+
+.privacy-note {
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid #eee;
+    color: #888;
+    font-size: 0.9rem;
+    text-align: center;
+}
+
+/* ==================== */
+/* Подвал сайта         */
+/* ==================== */
+
+.footer {
+    background: rgba(0, 0, 0, 0.8);
+    color: #aaa;
+    text-align: center;
+    padding: 20px 0;
+    margin-top: 40px;
+}
+
+.footer a {
+    color: #667eea;
+    text-decoration: none;
+}
+
+.footer a:hover {
+    text-decoration: underline;
+}
+
+/* ==================== */
+/* Анимации             */
+/* ==================== */
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes pulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+}
+
+/* Анимация для статуса при загрузке */
+.status-icon.loading {
+    animation: pulse 1s ease-in-out infinite;
+}
+
+/* ==================== */
+/* Адаптивность         */
+/* ==================== */
+
+@media (max-width: 768px) {
+    .header h1 {
+        font-size: 1.5rem;
+    }
+    
+    .status-card {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .coordinates {
+        width: 100%;
+        text-align: center;
+    }
+    
+    .btn {
+        padding: 10px 20px;
+        font-size: 0.9rem;
+    }
+    
+    #map {
+        height: 400px;
+    }
+}
+
+@media (max-width: 480px) {
+    #map {
+        height: 350px;
+    }
+    
+    .button-group {
+        flex-direction: column;
+    }
+    
+    .btn {
+        justify-content: center;
+    }
 }
