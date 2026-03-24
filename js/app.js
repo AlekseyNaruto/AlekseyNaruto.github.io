@@ -1,80 +1,71 @@
-// Глобальное хранилище данных
 const app = {
     currentUser: null,
     currentLinkId: null,
     currentFilter: 'all',
-    moderatorName: 'AlekseyNaruto', // Имя модератора
+    moderatorName: 'AlekseyNaruto',
+    dataSHA: null,  // Храним SHA файла для обновления
     
-    // Инициализация базы данных
-    initDB: function() {
-        if (!localStorage.getItem('users')) {
-            const users = {
-                'AlekseyNaruto': {
-                    password: btoa('moderator123'),
-                    role: 'moderator',
-                    registeredAt: new Date().toISOString()
-                }
-            };
-            localStorage.setItem('users', JSON.stringify(users));
-        }
-        
-        if (!localStorage.getItem('links')) {
-            const demoLinks = [
-                {
-                    id: '1',
-                    title: 'GitHub',
-                    description: 'Платформа для хостинга IT-проектов и совместной разработки',
-                    url: 'https://github.com',
-                    category: 'разработка',
-                    author: 'AlekseyNaruto',
-                    createdAt: new Date().toISOString(),
-                    comments: []
-                },
-                {
-                    id: '2',
-                    title: 'MDN Web Docs',
-                    description: 'Документация по веб-технологиям от Mozilla',
-                    url: 'https://developer.mozilla.org',
-                    category: 'учеба',
-                    author: 'AlekseyNaruto',
-                    createdAt: new Date().toISOString(),
-                    comments: []
-                }
-            ];
-            localStorage.setItem('links', JSON.stringify(demoLinks));
+    // Загрузка данных из GitHub
+    async loadData() {
+        try {
+            const { data, sha } = await githubAPI.getData();
+            this.dataSHA = sha;
+            return data;
+        } catch (error) {
+            console.error('Ошибка загрузки данных:', error);
+            return null;
         }
     },
     
-    // Получение текущего пользователя
-    getCurrentUser: function() {
-        return this.currentUser;
+    // Сохранение данных в GitHub
+    async saveData(data) {
+        try {
+            const newSha = await githubAPI.saveData(data, this.dataSHA);
+            this.dataSHA = newSha;
+            return true;
+        } catch (error) {
+            console.error('Ошибка сохранения:', error);
+            return false;
+        }
     },
     
-    // Проверка на модератора
-    isModerator: function() {
-        if (!this.currentUser) return false;
-        const users = JSON.parse(localStorage.getItem('users'));
-        return users[this.currentUser]?.role === 'moderator';
+    // Получить всех пользователей
+    async getUsers() {
+        const data = await this.loadData();
+        return data ? data.users : {};
+    },
+    
+    // Получить все ссылки
+    async getLinks() {
+        const data = await this.loadData();
+        return data ? data.links : [];
     },
     
     // Обновление статистики
-    updateStats: function() {
-        const links = JSON.parse(localStorage.getItem('links'));
-        const users = JSON.parse(localStorage.getItem('users'));
+    updateStats(data) {
+        if (!data) return;
         
+        const totalLinks = data.links?.length || 0;
         let totalComments = 0;
-        links.forEach(link => {
+        data.links?.forEach(link => {
             totalComments += link.comments?.length || 0;
         });
+        const totalUsers = Object.keys(data.users || {}).length;
         
-        document.getElementById('totalLinks').textContent = links.length;
+        document.getElementById('totalLinks').textContent = totalLinks;
         document.getElementById('totalComments').textContent = totalComments;
-        document.getElementById('totalUsers').textContent = Object.keys(users).length;
+        document.getElementById('totalUsers').textContent = totalUsers;
+    },
+    
+    // Проверка на модератора
+    isModerator() {
+        if (!this.currentUser) return false;
+        // Синхронная проверка, данные уже загружены
+        return this.currentUser === this.moderatorName;
     },
     
     // Инициализация
-    init: function() {
-        this.initDB();
-        auth.checkAuth();
+    async init() {
+        await auth.checkAuth();
     }
 };
