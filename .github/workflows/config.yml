@@ -1,0 +1,19 @@
+name: Generate Config
+on: [push]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Create config
+        run: |
+          echo "window.GITHUB_TOKEN = '${{ secrets.GH_TOKEN }}';" > js/config.js
+          echo "window.GITHUB_OWNER = '${{ github.repository_owner }}';" >> js/config.js
+          echo "window.GITHUB_REPO = '${{ github.event.repository.name }}';" >> js/config.js
+      - name: Commit
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git add js/config.js
+          git commit -m "Update config" || exit 0
+          git push
