@@ -1,8 +1,6 @@
-// ⚠️ ЗАМЕНИТЕ ЭТИ ДАННЫЕ НА ВАШИ ⚠️
+// Конфигурация без токена! Токен будет подставлен при деплое
 window.GITHUB_CONFIG = {
-    owner: 'AlekseyNaruto',      // Ваш логин на GitHub
-    repo: 'AlekseyNaruto.github.io',    // Название репозитория
-    token: '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'      // Ваш токен (начинается с ghp_)
+    owner: 'AlekseyNaruto',
+    repo: 'AlekseyNaruto.github.io',
+    // token добавляется через GitHub Actions!
 };
-
-console.log('✅ Config loaded');
