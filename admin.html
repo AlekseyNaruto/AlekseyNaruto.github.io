@@ -1,31 +1,29 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html>
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Admin</title>
-
 <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
 
 <div class="panel">
-  <h2>Заявки</h2>
-  <div id="apps"></div>
 
-  <h2>Состав</h2>
-  <div id="members"></div>
+<h2>Заявки</h2>
+<div id="apps"></div>
 
-  <h2>Ивенты</h2>
+<h2>Состав</h2>
+<div id="members"></div>
 
-  <input id="eventName" placeholder="Название">
-  <input id="eventDate" type="date">
-  <input id="eventDesc" placeholder="Описание">
+<h2>🚗 Автопарк</h2>
+<input type="file" id="carImage">
+<input id="carName" placeholder="Название">
+<button onclick="addCar()" class="btn">Добавить</button>
+<div id="garage"></div>
 
-  <button onclick="createEvent()" class="btn">Создать</button>
+<h2>🏆 Лидерборд</h2>
+<div id="leaderboard"></div>
+<button onclick="resetLeaderboard()" class="btn">Сброс</button>
 
-  <div id="events"></div>
 </div>
 
 <div id="toast-container"></div>
