@@ -1,65 +1,43 @@
-/* === GTA PANEL STYLE === */
-.panel{
-  max-width:420px;
-  margin:60px auto;
-  padding:25px;
+/* === GLOW TEXT === */
+.glow{
+  color:#F5AF19;
+  text-shadow:
+    0 0 10px #F5AF19,
+    0 0 20px #F5AF19,
+    0 0 40px #ffcc33;
+}
 
-  background:rgba(15,15,15,0.7);
-  backdrop-filter:blur(20px);
+/* SUBTITLE */
+.subtitle{
+  opacity:0.8;
+  margin-bottom:20px;
+  animation:fadeUp 1s ease;
+}
 
-  border:1px solid rgba(245,175,25,0.3);
-  border-radius:20px;
+/* BUTTON BLOCK */
+.buttons{
+  display:flex;
+  gap:10px;
+  justify-content:center;
+  flex-wrap:wrap;
+}
 
+/* PARALLAX EFFECT */
+.hero{
+  background-attachment:fixed;
+}
+
+/* CARD HOVER GLOW */
+.card:hover{
+  transform:translateY(-10px) scale(1.05);
   box-shadow:
-    0 0 20px rgba(245,175,25,0.2),
-    inset 0 0 10px rgba(245,175,25,0.1);
-
-  animation:fadeUp .6s ease;
+    0 0 15px #F5AF19,
+    0 0 40px rgba(245,175,25,0.5);
 }
 
-/* === ANIMATIONS === */
-@keyframes fadeUp{
-  from{
-    opacity:0;
-    transform:translateY(40px);
-  }
-  to{
-    opacity:1;
-    transform:translateY(0);
-  }
-}
-
-/* === INPUT GTA STYLE === */
-input,textarea{
-  background:#111;
-  color:#fff;
-  border:1px solid rgba(255,255,255,0.1);
-  transition:.3s;
-}
-
-input:focus,textarea:focus{
-  border-color:#F5AF19;
-  box-shadow:0 0 10px #F5AF19;
-  outline:none;
-}
-
-/* === BUTTON PRO === */
-.btn{
-  position:relative;
-  overflow:hidden;
-}
-
-.btn::after{
-  content:'';
-  position:absolute;
+/* IMAGE PREVIEW */
+.preview-img{
   width:100%;
-  height:100%;
-  top:0;
-  left:-100%;
-  background:linear-gradient(120deg,transparent,rgba(255,255,255,0.4),transparent);
-  transition:.5s;
-}
-
-.btn:hover::after{
-  left:100%;
+  border-radius:10px;
+  margin-top:10px;
 }
