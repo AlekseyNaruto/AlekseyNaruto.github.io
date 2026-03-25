@@ -1,8 +1,7 @@
-// ===== НАСТРОЙКИ =====
 const ADMIN_LOGIN = "Aleksey_Ross";
-const ADMIN_PASS = "12345";
+const ADMIN_PASS = "Aleksey11";
 
-// ===== STORAGE =====
+// STORAGE
 function getLS(key, def){
  try{
   let d = localStorage.getItem(key);
@@ -15,7 +14,7 @@ function setLS(key,val){
  localStorage.setItem(key, JSON.stringify(val));
 }
 
-// ===== TOAST =====
+// TOAST
 function toast(msg){
  let el=document.createElement('div');
  el.className='toast';
@@ -24,51 +23,36 @@ function toast(msg){
  setTimeout(()=>el.remove(),3000);
 }
 
-// ===== USER =====
-function getUser(){
- return localStorage.getItem('currentUser');
-}
-function isAdmin(){
- return getUser()===ADMIN_LOGIN;
-}
+// USER
+function getUser(){return localStorage.getItem('currentUser');}
+function isAdmin(){return getUser()===ADMIN_LOGIN;}
 
-// ===== LOGIN =====
+// LOGIN
 function login(){
  let n=loginNick.value;
  let p=loginPass.value;
 
- if(!n || !p) return toast("Заполни поля");
-
  if(n===ADMIN_LOGIN && p===ADMIN_PASS){
   localStorage.setItem('currentUser',n);
-  location='index.html';
-  return;
+ }else{
+  localStorage.setItem('currentUser',n);
  }
-
- localStorage.setItem('currentUser',n);
  location='index.html';
 }
 
-// защита админки
+// защита
 if(location.pathname.includes('admin') && !isAdmin()){
  location='login.html';
 }
 
-// ================= ЗАЯВКИ =================
+// ===== ЗАЯВКИ =====
 let form=document.getElementById('appForm');
-
 if(form){
  form.onsubmit=e=>{
   e.preventDefault();
 
   let apps=getLS('apps',[]);
-  let members=getLS('members',[]);
-
   let nick=getUser();
-  if(!nick) return location='login.html';
-
-  if(apps.find(a=>a.nick===nick)) return toast("Уже подано");
-  if(members.find(m=>m.nick===nick)) return toast("Ты уже в составе");
 
   apps.push({
    nick,
@@ -81,63 +65,21 @@ if(form){
  };
 }
 
-// ===== АДМИН ЗАЯВКИ =====
-function render(){
+function renderApps(){
  let apps=getLS('apps',[]);
- let members=getLS('members',[]);
+ let el=document.getElementById('apps');
+ if(!el) return;
 
- let appsEl=document.getElementById('apps');
- if(appsEl){
-  appsEl.innerHTML=apps.map((a,i)=>`
-   <div class="panel">
-    <b>${a.nick}</b><br>
-    lvl:${a.level}<br>
-    ${a.msg}<br>
-    <button onclick="accept(${i})">✔</button>
-    <button onclick="decline(${i})">✖</button>
-   </div>
-  `).join('');
- }
-
- let membersEl=document.getElementById('members');
- if(membersEl){
-  membersEl.innerHTML=members.map((m,i)=>`
-   <div>${m.nick}
-    <button onclick="removeM(${i})">❌</button>
-   </div>
-  `).join('');
- }
+ el.innerHTML=apps.map((a,i)=>`
+  <div class="panel">
+   <b>${a.nick}</b><br>
+   lvl:${a.level}<br>
+   ${a.msg}
+  </div>
+ `).join('');
 }
 
-function accept(i){
- let apps=getLS('apps',[]);
- let members=getLS('members',[]);
-
- members.push(apps[i]);
- apps.splice(i,1);
-
- setLS('apps',apps);
- setLS('members',members);
- render();
-}
-
-function decline(i){
- let apps=getLS('apps',[]);
- apps.splice(i,1);
- setLS('apps',apps);
- render();
-}
-
-function removeM(i){
- let members=getLS('members',[]);
- members.splice(i,1);
- setLS('members',members);
- render();
-}
-
-// ================= ЧАТ =================
-
-// отправка игрока
+// ===== ЧАТ =====
 function sendMessage(){
  let input=document.getElementById('chatInput');
  if(!input) return;
@@ -145,17 +87,12 @@ function sendMessage(){
  let text=input.value;
  let user=getUser();
 
- if(!user) return location='login.html';
  if(!text) return;
 
  let chats=getLS('chats',{});
-
  if(!chats[user]) chats[user]=[];
 
- chats[user].push({
-  from:user,
-  text
- });
+ chats[user].push({from:user,text});
 
  setLS('chats',chats);
 
@@ -163,20 +100,15 @@ function sendMessage(){
  renderChat();
 }
 
-// ответ админа
 function sendAdminReply(user){
  let input=document.getElementById(`reply_${user}`);
- if(!input) return;
-
  let text=input.value;
+
  if(!text) return;
 
  let chats=getLS('chats',{});
 
- chats[user].push({
-  from:"admin",
-  text
- });
+ chats[user].push({from:"admin",text});
 
  setLS('chats',chats);
 
@@ -184,7 +116,6 @@ function sendAdminReply(user){
  renderAdminChats();
 }
 
-// чат игрока
 function renderChat(){
  let user=getUser();
  let chats=getLS('chats',{});
@@ -204,7 +135,6 @@ function renderChat(){
  `).join('');
 }
 
-// чат админа
 function renderAdminChats(){
  let chats=getLS('chats',{});
  let el=document.getElementById('complaints');
@@ -213,26 +143,41 @@ function renderAdminChats(){
  el.innerHTML=Object.keys(chats).map(user=>`
   <div class="panel">
 
-   <b>${user}</b><br><br>
+   <b>${user}</b><br>
 
-   <div style="max-height:150px; overflow:auto; text-align:left;">
+   <div style="max-height:120px;overflow:auto;">
     ${chats[user].map(m=>`
      <div style="text-align:${m.from==='admin'?'right':'left'}">
-      <b>${m.from}:</b> ${m.text}
+      ${m.text}
      </div>
     `).join('')}
    </div>
 
-   <input id="reply_${user}" placeholder="Ответ...">
-   <button onclick="sendAdminReply('${user}')">Ответить</button>
+   <input id="reply_${user}">
+   <button onclick="sendAdminReply('${user}')">Ответ</button>
+   <button onclick="clearChat('${user}')">🧹</button>
 
   </div>
  `).join('');
 }
 
-// ================= INIT =================
+// очистка одного
+function clearChat(user){
+ let chats=getLS('chats',{});
+ delete chats[user];
+ setLS('chats',chats);
+ renderAdminChats();
+}
+
+// очистка всех
+function clearAllChats(){
+ localStorage.removeItem('chats');
+ renderAdminChats();
+}
+
+// INIT
 document.addEventListener("DOMContentLoaded", ()=>{
- render();
+ renderApps();
  renderChat();
  renderAdminChats();
 });
