@@ -1,43 +1,61 @@
-/* === GLOW TEXT === */
-.glow{
-  color:#F5AF19;
-  text-shadow:
-    0 0 10px #F5AF19,
-    0 0 20px #F5AF19,
-    0 0 40px #ffcc33;
+body{
+ background:#0a0a0a;
+ color:#fff;
+ font-family:sans-serif;
+ margin:0;
+ text-align:center;
 }
 
-/* SUBTITLE */
-.subtitle{
-  opacity:0.8;
-  margin-bottom:20px;
-  animation:fadeUp 1s ease;
-}
-
-/* BUTTON BLOCK */
-.buttons{
-  display:flex;
-  gap:10px;
-  justify-content:center;
-  flex-wrap:wrap;
-}
-
-/* PARALLAX EFFECT */
 .hero{
-  background-attachment:fixed;
+ padding:100px;
 }
 
-/* CARD HOVER GLOW */
-.card:hover{
-  transform:translateY(-10px) scale(1.05);
-  box-shadow:
-    0 0 15px #F5AF19,
-    0 0 40px rgba(245,175,25,0.5);
+.glow{
+ color:#F5AF19;
+ text-shadow:0 0 20px #F5AF19;
 }
 
-/* IMAGE PREVIEW */
+.btn{
+ padding:10px 20px;
+ background:#F5AF19;
+ border:none;
+ margin:5px;
+ cursor:pointer;
+}
+
+.panel{
+ margin:50px auto;
+ padding:20px;
+ width:300px;
+ background:#111;
+ border-radius:10px;
+}
+
+.cards{
+ display:flex;
+ flex-wrap:wrap;
+ justify-content:center;
+}
+
+.card{
+ background:#111;
+ margin:10px;
+ padding:10px;
+ width:200px;
+}
+
 .preview-img{
-  width:100%;
-  border-radius:10px;
-  margin-top:10px;
+ width:100%;
+}
+
+#toast-container{
+ position:fixed;
+ bottom:10px;
+ right:10px;
+}
+
+.toast{
+ background:#333;
+ padding:10px;
+ margin:5px;
 }
