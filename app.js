@@ -1,256 +1,181 @@
-// ====== НАСТРОЙКИ ======
 const ADMIN_LOGIN = "Aleksey_Ross";
-const ADMIN_PASS = "Aleksey11";
+const ADMIN_PASS = "12345";
 
-// ====== TOAST ======
-function toast(msg, type="info"){
- const el=document.createElement('div');
- el.className='toast '+type;
+function toast(msg){
+ let el=document.createElement('div');
+ el.className='toast';
  el.innerText=msg;
  document.getElementById('toast-container')?.appendChild(el);
  setTimeout(()=>el.remove(),3000);
 }
 
-// ====== LOGIN ======
+// LOGIN
 function login(){
- let nick=document.getElementById('loginNick').value;
- let pass=document.getElementById('loginPass').value;
+ let n=loginNick.value;
+ let p=loginPass.value;
 
- if(!nick || !pass) return toast('Заполни поля');
-
- if(nick===ADMIN_LOGIN && pass===ADMIN_PASS){
-   localStorage.setItem('currentUser', nick);
-   toast('Админ вход выполнен');
-   setTimeout(()=>location='index.html',800);
- } else {
-   localStorage.setItem('currentUser', nick);
-   toast('Вы вошли как игрок');
-   setTimeout(()=>location='index.html',800);
+ if(n===ADMIN_LOGIN && p===ADMIN_PASS){
+  localStorage.setItem('currentUser',n);
+  location='index.html';
+ }else{
+  localStorage.setItem('currentUser',n);
+  location='index.html';
  }
 }
 
-// ====== USER ======
-function getUser(){
- return localStorage.getItem('currentUser');
+function getUser(){return localStorage.getItem('currentUser');}
+function isAdmin(){return getUser()===ADMIN_LOGIN;}
+
+if(location.pathname.includes('admin')&&!isAdmin()){
+ location='login.html';
 }
 
-function isAdmin(){
- return getUser() === ADMIN_LOGIN;
-}
-
-// ====== ADMIN ACCESS ======
-if(location.pathname.includes('admin')){
- if(!isAdmin()){
-  alert('Нет доступа');
-  location='login.html';
- }
-}
-
-// ====== CABINET ======
-const form=document.getElementById('appForm');
-
+// APPLICATION
+let form=document.getElementById('appForm');
 if(form){
  form.onsubmit=e=>{
   e.preventDefault();
 
-  let apps=JSON.parse(localStorage.getItem('apps')||'[]');
-  let members=JSON.parse(localStorage.getItem('members')||'[]');
+  let apps=JSON.parse(localStorage.apps||"[]");
+  let members=JSON.parse(localStorage.members||"[]");
 
   let nick=getUser();
-  if(!nick) return location='login.html';
 
-  if(apps.find(a=>a.nick===nick)) return toast('Уже подано');
-  if(members.find(m=>m.nick===nick)) return toast('Ты уже в составе');
+  let level=level.value;
+  let msg=msg.value;
 
-  apps.push({nick});
-  localStorage.setItem('apps',JSON.stringify(apps));
+  apps.push({nick,level,msg});
+  localStorage.apps=JSON.stringify(apps);
 
-  toast('Заявка отправлена','success');
+  toast("Отправлено");
  };
 }
 
-// ====== ADMIN ======
+// ADMIN
 function render(){
- let apps=JSON.parse(localStorage.getItem('apps')||'[]');
- let members=JSON.parse(localStorage.getItem('members')||'[]');
- let events=JSON.parse(localStorage.getItem('events')||'[]');
+ let apps=JSON.parse(localStorage.apps||"[]");
+ let members=JSON.parse(localStorage.members||"[]");
 
- let appsEl=document.getElementById('apps');
- let membersEl=document.getElementById('members');
- let eventsEl=document.getElementById('events');
-
- if(appsEl){
+ if(appsEl=document.getElementById('apps')){
   appsEl.innerHTML=apps.map((a,i)=>`
-   <div>${a.nick}
+   <div class="card">
+    ${a.nick}<br>
+    lvl:${a.level}<br>
+    ${a.msg}<br>
     <button onclick="accept(${i})">✔</button>
     <button onclick="decline(${i})">✖</button>
-   </div>
-  `).join('');
+   </div>`).join('');
  }
 
- if(membersEl){
+ if(membersEl=document.getElementById('members')){
   membersEl.innerHTML=members.map((m,i)=>`
    <div>${m.nick}
-    <button onclick="removeM(${i})">Удалить</button>
-   </div>
-  `).join('');
- }
-
- if(eventsEl){
-  eventsEl.innerHTML=events.map((e,i)=>`
-   <div>${e.name}
-    <button onclick="removeEvent(${i})">✖</button>
-   </div>
-  `).join('');
+    <button onclick="removeM(${i})">X</button>
+   </div>`).join('');
  }
 }
 
-// ====== ACTIONS ======
 function accept(i){
- let apps=JSON.parse(localStorage.getItem('apps'));
- let members=JSON.parse(localStorage.getItem('members')||[]);
+ let apps=JSON.parse(localStorage.apps);
+ let members=JSON.parse(localStorage.members||"[]");
 
  members.push(apps[i]);
  apps.splice(i,1);
 
- localStorage.setItem('apps',JSON.stringify(apps));
- localStorage.setItem('members',JSON.stringify(members));
-
- toast('Принят');
+ localStorage.apps=JSON.stringify(apps);
+ localStorage.members=JSON.stringify(members);
  render();
 }
 
 function decline(i){
- let apps=JSON.parse(localStorage.getItem('apps'));
+ let apps=JSON.parse(localStorage.apps);
  apps.splice(i,1);
-
- localStorage.setItem('apps',JSON.stringify(apps));
-
- toast('Отклонен');
+ localStorage.apps=JSON.stringify(apps);
  render();
 }
 
 function removeM(i){
- let members=JSON.parse(localStorage.getItem('members'));
+ let members=JSON.parse(localStorage.members);
  members.splice(i,1);
-
- localStorage.setItem('members',JSON.stringify(members));
-
- toast('Удален');
+ localStorage.members=JSON.stringify(members);
  render();
 }
 
-// ====== EVENTS ======
-function createEvent(){
- let events=JSON.parse(localStorage.getItem('events')||[]);
-
- let name=eventName.value;
- let date=eventDate.value;
- let desc=eventDesc.value;
-
- if(!name) return toast('Введите название');
-
- events.push({name,date,desc});
- localStorage.setItem('events',JSON.stringify(events));
-
- toast('Создано');
- render();
-}
-
-function removeEvent(i){
- let events=JSON.parse(localStorage.getItem('events'));
- events.splice(i,1);
- localStorage.setItem('events',JSON.stringify(events));
-
- render();
-}
-
-// ====== GARAGE ======
+// GARAGE
 function addCar(){
- if(!isAdmin()) return toast('Нет доступа');
+ let file=carImage.files[0];
+ let name=carName.value;
 
- const file=carImage.files[0];
- const name=carName.value;
-
- if(!file||!name) return toast('Заполни всё');
-
- const reader=new FileReader();
-
- reader.onload=function(){
-  let garage=JSON.parse(localStorage.getItem('garage')||[]);
-
-  garage.push({name,img:reader.result});
-  localStorage.setItem('garage',JSON.stringify(garage));
-
+ let reader=new FileReader();
+ reader.onload=()=>{
+  let g=JSON.parse(localStorage.garage||"[]");
+  g.push({name,img:reader.result});
+  localStorage.garage=JSON.stringify(g);
   renderGarage();
  };
-
  reader.readAsDataURL(file);
 }
 
 function renderGarage(){
- let garage=JSON.parse(localStorage.getItem('garage')||[]);
-
+ let g=JSON.parse(localStorage.garage||"[]");
  let el=document.getElementById('garage');
- if(!el) return;
+ if(!el)return;
 
- el.innerHTML=garage.map((car,i)=>`
+ el.innerHTML=g.map(c=>`
   <div class="card">
-   <b>${car.name}</b>
-   <img src="${car.img}" class="preview-img">
-   <button onclick="removeCar(${i})">Удалить</button>
-  </div>
- `).join('');
+   ${c.name}
+   <img src="${c.img}">
+  </div>`).join('');
 }
 
-function removeCar(i){
- let garage=JSON.parse(localStorage.getItem('garage'));
- garage.splice(i,1);
- localStorage.setItem('garage',JSON.stringify(garage));
- renderGarage();
+// PUBLIC GARAGE
+function renderPublicGarage(){
+ let g=JSON.parse(localStorage.garage||"[]");
+ let el=document.getElementById('publicGarage');
+ if(!el)return;
+
+ el.innerHTML=g.map(c=>`
+  <div class="card">
+   ${c.name}
+   <img src="${c.img}">
+  </div>`).join('');
 }
 
-// ====== GAME ======
+// GAME
+let lastClick=0;
 function clickMoney(){
+ let now=Date.now();
+ if(now-lastClick<1000) return;
+ lastClick=now;
+
  let user=getUser();
- if(!user) return location='login.html';
+ let lb=JSON.parse(localStorage.lb||"{}");
 
- let lb=JSON.parse(localStorage.getItem('leaderboard')||{});
  lb[user]=(lb[user]||0)+1;
+ localStorage.lb=JSON.stringify(lb);
 
- localStorage.setItem('leaderboard',JSON.stringify(lb));
+ document.getElementById('score').innerText=lb[user];
  renderLeaderboard();
 }
 
 function renderLeaderboard(){
- let lb=JSON.parse(localStorage.getItem('leaderboard')||{});
- let sorted=Object.entries(lb).sort((a,b)=>b[1]-a[1]);
-
+ let lb=JSON.parse(localStorage.lb||"{}");
  let el=document.getElementById('leaderboard');
- if(!el) return;
+ if(!el)return;
 
- el.innerHTML=sorted.map(([n,s])=>`<div>${n}: ${s}</div>`).join('');
+ el.innerHTML=Object.entries(lb)
+  .sort((a,b)=>b[1]-a[1])
+  .map(([n,s])=>`${n}: ${s}`).join('<br>');
 }
 
 function resetLeaderboard(){
- if(!isAdmin()) return toast('Нет доступа');
-
- localStorage.removeItem('leaderboard');
+ if(!isAdmin()) return;
+ localStorage.removeItem('lb');
  renderLeaderboard();
 }
 
-// ====== RESET MONTH ======
-(function(){
- let last=localStorage.getItem('lb_reset');
- let now=new Date().getMonth();
-
- if(last!=now){
-  localStorage.removeItem('leaderboard');
-  localStorage.setItem('lb_reset',now);
- }
-})();
-
-// ====== INIT ======
+// INIT
 render();
 renderGarage();
+renderPublicGarage();
 renderLeaderboard();
