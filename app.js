@@ -1,8 +1,7 @@
-// ===== НАСТРОЙКИ =====
 const ADMIN_LOGIN = "Aleksey_Ross";
-const ADMIN_PASS = "12345";
+const ADMIN_PASS = "Aleksey11";
 
-// ===== SAFE STORAGE =====
+// ===== STORAGE =====
 function getLS(key, def){
  try{
   let d = localStorage.getItem(key);
@@ -24,14 +23,6 @@ function toast(msg){
  setTimeout(()=>el.remove(),3000);
 }
 
-// ===== USER =====
-function getUser(){
- return localStorage.getItem('currentUser');
-}
-function isAdmin(){
- return getUser() === ADMIN_LOGIN;
-}
-
 // ===== LOGIN =====
 function login(){
  let n=loginNick.value;
@@ -46,98 +37,106 @@ function login(){
  }
 }
 
-// ===== ADMIN ACCESS =====
+function getUser(){
+ return localStorage.getItem('currentUser');
+}
+
+function isAdmin(){
+ return getUser()===ADMIN_LOGIN;
+}
+
+// защита админки
 if(location.pathname.includes('admin') && !isAdmin()){
  location='login.html';
 }
 
-// ================= CHAT SYSTEM =================
+// ===== ЧАТ =====
 
-// создать сообщение
+// отправка игрока
 function sendMessage(){
- let input = document.getElementById('chatInput');
- let text = input.value;
- let user = getUser();
+ let input=document.getElementById('chatInput');
+ let text=input.value;
+ let user=getUser();
 
  if(!text) return;
 
- let chats = getLS('chats', {});
+ let chats=getLS('chats',{});
 
- if(!chats[user]) chats[user] = [];
+ if(!chats[user]) chats[user]=[];
 
  chats[user].push({
-  from: user,
-  text,
-  time: new Date().toLocaleTimeString()
+  from:user,
+  text
  });
 
- setLS('chats', chats);
+ setLS('chats',chats);
 
  input.value="";
  renderChat();
 }
 
 // ответ админа
-function adminReply(user){
- let text = prompt("Ответ:");
+function sendAdminReply(user){
+ let input=document.getElementById(`reply_${user}`);
+ let text=input.value;
+
  if(!text) return;
 
- let chats = getLS('chats', {});
+ let chats=getLS('chats',{});
 
  chats[user].push({
-  from: "admin",
-  text,
-  time: new Date().toLocaleTimeString()
+  from:"admin",
+  text
  });
 
- setLS('chats', chats);
+ setLS('chats',chats);
 
+ input.value="";
  renderAdminChats();
 }
 
-// ===== РЕНДЕР ЧАТА ИГРОКА =====
+// ===== РЕНДЕР ИГРОКА =====
 function renderChat(){
- let user = getUser();
- let chats = getLS('chats', {});
+ let user=getUser();
+ let chats=getLS('chats',{});
+ let el=document.getElementById('chatBox');
 
- let el = document.getElementById('chatBox');
  if(!el || !chats[user]) return;
 
- el.innerHTML = chats[user].map(m=>`
+ el.innerHTML=chats[user].map(m=>`
   <div style="text-align:${m.from==='admin'?'right':'left'}">
-   <b>${m.from}</b>: ${m.text}
+   <b>${m.from}:</b> ${m.text}
   </div>
  `).join('');
 }
 
 // ===== РЕНДЕР АДМИНА =====
 function renderAdminChats(){
- let chats = getLS('chats', {});
- let el = document.getElementById('complaints');
-
+ let chats=getLS('chats',{});
+ let el=document.getElementById('complaints');
  if(!el) return;
 
- el.innerHTML = Object.keys(chats).map(user=>`
-  <div class="card">
-   <b>${user}</b><br>
-   ${chats[user].slice(-3).map(m=>m.text).join('<br>')}<br><br>
+ el.innerHTML=Object.keys(chats).map(user=>`
+  <div class="panel">
 
-   <button onclick="adminReply('${user}')">Ответить</button>
-   <button onclick="clearChat('${user}')">Очистить</button>
+   <b>${user}</b><br><br>
+
+   <div style="max-height:150px; overflow:auto; text-align:left;">
+    ${chats[user].map(m=>`
+     <div style="text-align:${m.from==='admin'?'right':'left'}">
+      <b>${m.from}:</b> ${m.text}
+     </div>
+    `).join('')}
+   </div>
+
+   <input id="reply_${user}" placeholder="Ответ...">
+   <button onclick="sendAdminReply('${user}')">Ответить</button>
+
   </div>
  `).join('');
 }
 
-// очистка
-function clearChat(user){
- let chats = getLS('chats', {});
- delete chats[user];
- setLS('chats', chats);
-
- renderAdminChats();
-}
-
-// ================= INIT =================
+// ===== INIT =====
 document.addEventListener("DOMContentLoaded", ()=>{
  renderChat();
  renderAdminChats();
