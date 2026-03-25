@@ -1,21 +1,28 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
 <meta charset="UTF-8">
+<title>Кабинет</title>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
 <div class="panel">
-  <h2>Кабинет</h2>
+  <h2>👤 Кабинет</h2>
 
+  <!-- ЗАЯВКА -->
   <form id="appForm">
     <input id="level" placeholder="Уровень">
     <textarea id="msg" placeholder="О себе"></textarea>
     <button class="btn">Подать заявку</button>
   </form>
 
-  <h3 id="status"></h3>
+  <!-- СВЯЗЬ С АДМИНОМ -->
+  <h2>📩 Связь с админом</h2>
+
+  <textarea id="complaintText" placeholder="Напиши жалобу или вопрос"></textarea>
+  <button class="btn" onclick="sendComplaint()">Отправить</button>
+
 </div>
 
 <div id="toast-container"></div>
@@ -23,7 +30,3 @@
 <script src="app.js"></script>
 </body>
 </html>
-<h2>📩 Связь с админом</h2>
-
-<textarea id="complaintText" placeholder="Опиши проблему"></textarea>
-<button class="btn" onclick="sendComplaint()">Отправить</button>
