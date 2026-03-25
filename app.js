@@ -1,7 +1,8 @@
+// ===== НАСТРОЙКИ =====
 const ADMIN_LOGIN = "Aleksey_Ross";
-const ADMIN_PASS = "Aleksey11";
+const ADMIN_PASS = "12345";
 
-// ===== STORAGE SAFE =====
+// ===== SAFE STORAGE =====
 function getLS(key, def){
  try{
   let d = localStorage.getItem(key);
@@ -23,52 +24,26 @@ function toast(msg){
  setTimeout(()=>el.remove(),3000);
 }
 
-// ===== USERS =====
-function register(){
- let nick=loginNick.value;
- let pass=loginPass.value;
-
- if(!nick || !pass) return toast("Заполни поля");
-
- let users=getLS('users',[]);
-
- if(users.find(u=>u.nick===nick)){
-  return toast("Ник уже занят");
- }
-
- users.push({nick,pass});
- setLS('users',users);
-
- toast("Аккаунт создан");
-}
-
-function login(){
- let nick=loginNick.value;
- let pass=loginPass.value;
-
- let users=getLS('users',[]);
-
- // админ
- if(nick===ADMIN_LOGIN && pass===ADMIN_PASS){
-  localStorage.setItem('currentUser',nick);
-  location='index.html';
-  return;
- }
-
- let user=users.find(u=>u.nick===nick && u.pass===pass);
-
- if(!user) return toast("Неверные данные");
-
- localStorage.setItem('currentUser',nick);
- location='index.html';
-}
-
+// ===== USER =====
 function getUser(){
  return localStorage.getItem('currentUser');
 }
-
 function isAdmin(){
- return getUser()===ADMIN_LOGIN;
+ return getUser() === ADMIN_LOGIN;
+}
+
+// ===== LOGIN =====
+function login(){
+ let n=loginNick.value;
+ let p=loginPass.value;
+
+ if(n===ADMIN_LOGIN && p===ADMIN_PASS){
+  localStorage.setItem('currentUser',n);
+  location='index.html';
+ }else{
+  localStorage.setItem('currentUser',n);
+  location='index.html';
+ }
 }
 
 // ===== ADMIN ACCESS =====
@@ -76,283 +51,94 @@ if(location.pathname.includes('admin') && !isAdmin()){
  location='login.html';
 }
 
-// ===== CABINET =====
-let form=document.getElementById('appForm');
-if(form){
- form.onsubmit=e=>{
-  e.preventDefault();
+// ================= CHAT SYSTEM =================
 
-  let apps=getLS('apps',[]);
-  let members=getLS('members',[]);
-
-  let nick=getUser();
-  if(!nick) return location='login.html';
-
-  if(apps.find(a=>a.nick===nick)) return toast("Уже подано");
-  if(members.find(m=>m.nick===nick)) return toast("Ты уже в составе");
-
-  apps.push({
-   nick,
-   level:level.value,
-   msg:msg.value
-  });
-
-  setLS('apps',apps);
-  toast("Заявка отправлена");
- };
-}
-
-// ===== ADMIN =====
-function render(){
- let apps=getLS('apps',[]);
- let members=getLS('members',[]);
-
- let appsEl=document.getElementById('apps');
- if(appsEl){
-  appsEl.innerHTML=apps.map((a,i)=>`
-   <div class="card">
-    <b>${a.nick}</b><br>
-    lvl:${a.level}<br>
-    ${a.msg}<br>
-    <button onclick="accept(${i})">✔</button>
-    <button onclick="decline(${i})">✖</button>
-   </div>
-  `).join('');
- }
-
- let membersEl=document.getElementById('members');
- if(membersEl){
-  membersEl.innerHTML=members.map((m,i)=>`
-   <div>${m.nick}
-    <button onclick="removeM(${i})">❌</button>
-   </div>
-  `).join('');
- }
-}
-
-function accept(i){
- let apps=getLS('apps',[]);
- let members=getLS('members',[]);
-
- members.push(apps[i]);
- apps.splice(i,1);
-
- setLS('apps',apps);
- setLS('members',members);
- render();
-}
-
-function decline(i){
- let apps=getLS('apps',[]);
- apps.splice(i,1);
- setLS('apps',apps);
- render();
-}
-
-function removeM(i){
- let members=getLS('members',[]);
- members.splice(i,1);
- setLS('members',members);
- render();
-}
-
-// ===== GARAGE =====
-function addCar(){
- if(!isAdmin()) return toast("Нет доступа");
-
- let file=carImage.files[0];
- let name=carName.value;
-
- if(!file || !name) return toast("Заполни всё");
-
- let reader=new FileReader();
-
- reader.onload=()=>{
-  let g=getLS('garage',[]);
-
-  g.push({name,img:reader.result});
-  setLS('garage',g);
-
-  renderGarage();
- };
-
- reader.readAsDataURL(file);
-}
-
-// 🔥 УДАЛЕНИЕ МАШИНЫ
-function removeCar(i){
- let g=getLS('garage',[]);
-
- g.splice(i,1);
- setLS('garage',g);
-
- toast("Удалено");
- renderGarage();
-}
-
-// отображение
-function renderGarage(){
- let g=getLS('garage',[]);
- let el=document.getElementById('garage');
- if(!el) return;
-
- el.innerHTML=g.map((c,i)=>`
-  <div class="card">
-   ${c.name}
-   <img src="${c.img}" class="preview-img">
-   <button onclick="removeCar(${i})">Удалить</button>
-  </div>
- `).join('');
-}
-
-// публичный автопарк
-function renderPublicGarage(){
- let g=getLS('garage',[]);
- let el=document.getElementById('publicGarage');
- if(!el) return;
-
- el.innerHTML=g.map(c=>`
-  <div class="card">
-   ${c.name}
-   <img src="${c.img}" class="preview-img">
-  </div>
- `).join('');
-}
-
-// ===== GAME =====
-let lastClick=0;
-function clickMoney(){
- let now=Date.now();
- if(now-lastClick<1000) return;
- lastClick=now;
-
- let user=getUser();
- if(!user) return location='login.html';
-
- let lb=getLS('lb',{});
- lb[user]=(lb[user]||0)+1;
-
- setLS('lb',lb);
-
- document.getElementById('score').innerText=lb[user];
- renderLeaderboard();
-}
-
-function renderLeaderboard(){
- let lb=getLS('lb',{});
- let el=document.getElementById('leaderboard');
- if(!el) return;
-
- el.innerHTML=Object.entries(lb)
-  .sort((a,b)=>b[1]-a[1])
-  .map(([n,s])=>`${n}: ${s}`).join('<br>');
-}
-
-function resetLeaderboard(){
- if(!isAdmin()) return toast("Нет доступа");
-
- localStorage.removeItem('lb');
- renderLeaderboard();
-}
-
-// ===== INIT =====
-render();
-renderGarage();
-renderPublicGarage();
-renderLeaderboard();
-// ================= ЖАЛОБЫ =================
-function sendComplaint(){
- let text = document.getElementById('complaintText')?.value;
+// создать сообщение
+function sendMessage(){
+ let input = document.getElementById('chatInput');
+ let text = input.value;
  let user = getUser();
 
- if(!text) return toast("Напиши сообщение");
+ if(!text) return;
 
- let complaints = getLS('complaints', []);
+ let chats = getLS('chats', {});
 
- complaints.push({
-  user,
+ if(!chats[user]) chats[user] = [];
+
+ chats[user].push({
+  from: user,
   text,
-  date: new Date().toLocaleString()
+  time: new Date().toLocaleTimeString()
  });
 
- setLS('complaints', complaints);
+ setLS('chats', chats);
 
- toast("Отправлено");
- document.getElementById('complaintText').value = "";
+ input.value="";
+ renderChat();
 }
 
-// ===== ПОКАЗ ЖАЛОБ =====
-function renderComplaints(){
- let complaints = getLS('complaints', []);
+// ответ админа
+function adminReply(user){
+ let text = prompt("Ответ:");
+ if(!text) return;
+
+ let chats = getLS('chats', {});
+
+ chats[user].push({
+  from: "admin",
+  text,
+  time: new Date().toLocaleTimeString()
+ });
+
+ setLS('chats', chats);
+
+ renderAdminChats();
+}
+
+// ===== РЕНДЕР ЧАТА ИГРОКА =====
+function renderChat(){
+ let user = getUser();
+ let chats = getLS('chats', {});
+
+ let el = document.getElementById('chatBox');
+ if(!el || !chats[user]) return;
+
+ el.innerHTML = chats[user].map(m=>`
+  <div style="text-align:${m.from==='admin'?'right':'left'}">
+   <b>${m.from}</b>: ${m.text}
+  </div>
+ `).join('');
+}
+
+// ===== РЕНДЕР АДМИНА =====
+function renderAdminChats(){
+ let chats = getLS('chats', {});
  let el = document.getElementById('complaints');
+
  if(!el) return;
 
- el.innerHTML = complaints.map((c,i)=>`
+ el.innerHTML = Object.keys(chats).map(user=>`
   <div class="card">
-    <b>${c.user}</b><br>
-    ${c.text}<br>
-    <small>${c.date}</small><br><br>
+   <b>${user}</b><br>
+   ${chats[user].slice(-3).map(m=>m.text).join('<br>')}<br><br>
 
-    <button onclick="removeComplaint(${i})">❌ Удалить</button>
+   <button onclick="adminReply('${user}')">Ответить</button>
+   <button onclick="clearChat('${user}')">Очистить</button>
   </div>
  `).join('');
 }
 
-// удалить жалобу
-function removeComplaint(i){
- let complaints = getLS('complaints', []);
- complaints.splice(i,1);
- setLS('complaints', complaints);
+// очистка
+function clearChat(user){
+ let chats = getLS('chats', {});
+ delete chats[user];
+ setLS('chats', chats);
 
- toast("Удалено");
- renderComplaints();
+ renderAdminChats();
 }
 
-// ================= ШАБЛОНЫ =================
-function addTemplate(){
- let text = document.getElementById('templateInput')?.value;
-
- if(!text) return toast("Введите текст");
-
- let templates = getLS('templates', []);
- templates.push(text);
-
- setLS('templates', templates);
- document.getElementById('templateInput').value = "";
-
- renderTemplates();
-}
-
-// удалить
-function removeTemplate(i){
- let templates = getLS('templates', []);
- templates.splice(i,1);
- setLS('templates', templates);
-
- renderTemplates();
-}
-
-// копировать
-function useTemplate(text){
- navigator.clipboard.writeText(text);
- toast("Скопировано");
-}
-
-// показать
-function renderTemplates(){
- let templates = getLS('templates', []);
- let el = document.getElementById('templates');
- if(!el) return;
-
- el.innerHTML = templates.map((t,i)=>`
-  <div class="card">
-    ${t}<br><br>
-    <button onclick="useTemplate('${t}')">📋</button>
-    <button onclick="removeTemplate(${i})">➖</button>
-  </div>
- `).join('');
-}
-
-// ================= INIT ДОБАВКА =================
-renderComplaints();
-renderTemplates();
+// ================= INIT =================
+document.addEventListener("DOMContentLoaded", ()=>{
+ renderChat();
+ renderAdminChats();
+});
