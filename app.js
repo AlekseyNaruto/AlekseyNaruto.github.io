@@ -260,9 +260,9 @@ render();
 renderGarage();
 renderPublicGarage();
 renderLeaderboard();
-// ===== ЖАЛОБЫ =====
+// ================= ЖАЛОБЫ =================
 function sendComplaint(){
- let text = document.getElementById('complaintText').value;
+ let text = document.getElementById('complaintText')?.value;
  let user = getUser();
 
  if(!text) return toast("Напиши сообщение");
@@ -281,7 +281,7 @@ function sendComplaint(){
  document.getElementById('complaintText').value = "";
 }
 
-// ===== ОТОБРАЖЕНИЕ ЖАЛОБ =====
+// ===== ПОКАЗ ЖАЛОБ =====
 function renderComplaints(){
  let complaints = getLS('complaints', []);
  let el = document.getElementById('complaints');
@@ -293,7 +293,7 @@ function renderComplaints(){
     ${c.text}<br>
     <small>${c.date}</small><br><br>
 
-    <button onclick="removeComplaint(${i})">Удалить</button>
+    <button onclick="removeComplaint(${i})">❌ Удалить</button>
   </div>
  `).join('');
 }
@@ -308,9 +308,10 @@ function removeComplaint(i){
  renderComplaints();
 }
 
-// ===== ШАБЛОНЫ =====
+// ================= ШАБЛОНЫ =================
 function addTemplate(){
- let text = document.getElementById('templateInput').value;
+ let text = document.getElementById('templateInput')?.value;
+
  if(!text) return toast("Введите текст");
 
  let templates = getLS('templates', []);
@@ -322,7 +323,7 @@ function addTemplate(){
  renderTemplates();
 }
 
-// удалить шаблон
+// удалить
 function removeTemplate(i){
  let templates = getLS('templates', []);
  templates.splice(i,1);
@@ -331,13 +332,13 @@ function removeTemplate(i){
  renderTemplates();
 }
 
-// использовать шаблон
+// копировать
 function useTemplate(text){
  navigator.clipboard.writeText(text);
  toast("Скопировано");
 }
 
-// отображение
+// показать
 function renderTemplates(){
  let templates = getLS('templates', []);
  let el = document.getElementById('templates');
@@ -352,6 +353,6 @@ function renderTemplates(){
  `).join('');
 }
 
-// ===== INIT ДОП =====
+// ================= INIT ДОБАВКА =================
 renderComplaints();
 renderTemplates();
