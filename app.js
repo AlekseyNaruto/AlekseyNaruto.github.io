@@ -260,3 +260,98 @@ render();
 renderGarage();
 renderPublicGarage();
 renderLeaderboard();
+// ===== ЖАЛОБЫ =====
+function sendComplaint(){
+ let text = document.getElementById('complaintText').value;
+ let user = getUser();
+
+ if(!text) return toast("Напиши сообщение");
+
+ let complaints = getLS('complaints', []);
+
+ complaints.push({
+  user,
+  text,
+  date: new Date().toLocaleString()
+ });
+
+ setLS('complaints', complaints);
+
+ toast("Отправлено");
+ document.getElementById('complaintText').value = "";
+}
+
+// ===== ОТОБРАЖЕНИЕ ЖАЛОБ =====
+function renderComplaints(){
+ let complaints = getLS('complaints', []);
+ let el = document.getElementById('complaints');
+ if(!el) return;
+
+ el.innerHTML = complaints.map((c,i)=>`
+  <div class="card">
+    <b>${c.user}</b><br>
+    ${c.text}<br>
+    <small>${c.date}</small><br><br>
+
+    <button onclick="removeComplaint(${i})">Удалить</button>
+  </div>
+ `).join('');
+}
+
+// удалить жалобу
+function removeComplaint(i){
+ let complaints = getLS('complaints', []);
+ complaints.splice(i,1);
+ setLS('complaints', complaints);
+
+ toast("Удалено");
+ renderComplaints();
+}
+
+// ===== ШАБЛОНЫ =====
+function addTemplate(){
+ let text = document.getElementById('templateInput').value;
+ if(!text) return toast("Введите текст");
+
+ let templates = getLS('templates', []);
+ templates.push(text);
+
+ setLS('templates', templates);
+ document.getElementById('templateInput').value = "";
+
+ renderTemplates();
+}
+
+// удалить шаблон
+function removeTemplate(i){
+ let templates = getLS('templates', []);
+ templates.splice(i,1);
+ setLS('templates', templates);
+
+ renderTemplates();
+}
+
+// использовать шаблон
+function useTemplate(text){
+ navigator.clipboard.writeText(text);
+ toast("Скопировано");
+}
+
+// отображение
+function renderTemplates(){
+ let templates = getLS('templates', []);
+ let el = document.getElementById('templates');
+ if(!el) return;
+
+ el.innerHTML = templates.map((t,i)=>`
+  <div class="card">
+    ${t}<br><br>
+    <button onclick="useTemplate('${t}')">📋</button>
+    <button onclick="removeTemplate(${i})">➖</button>
+  </div>
+ `).join('');
+}
+
+// ===== INIT ДОП =====
+renderComplaints();
+renderTemplates();
