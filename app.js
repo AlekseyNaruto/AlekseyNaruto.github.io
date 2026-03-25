@@ -1,7 +1,7 @@
 const ADMIN_LOGIN = "Aleksey_Ross";
-const ADMIN_PASS = "12345";
+const ADMIN_PASS = "Aleksey11";
 
-// SAFE STORAGE
+// ===== STORAGE SAFE =====
 function getLS(key, def){
  try{
   let d = localStorage.getItem(key);
@@ -14,7 +14,7 @@ function setLS(key,val){
  localStorage.setItem(key, JSON.stringify(val));
 }
 
-// TOAST
+// ===== TOAST =====
 function toast(msg){
  let el=document.createElement('div');
  el.className='toast';
@@ -23,30 +23,60 @@ function toast(msg){
  setTimeout(()=>el.remove(),3000);
 }
 
-// LOGIN
-function login(){
- let n=loginNick.value;
- let p=loginPass.value;
+// ===== USERS =====
+function register(){
+ let nick=loginNick.value;
+ let pass=loginPass.value;
 
- if(!n||!p) return toast("Заполни поля");
+ if(!nick || !pass) return toast("Заполни поля");
 
- if(n===ADMIN_LOGIN && p===ADMIN_PASS){
-  localStorage.setItem('currentUser',n);
-  location='index.html';
- }else{
-  localStorage.setItem('currentUser',n);
-  location='index.html';
+ let users=getLS('users',[]);
+
+ if(users.find(u=>u.nick===nick)){
+  return toast("Ник уже занят");
  }
+
+ users.push({nick,pass});
+ setLS('users',users);
+
+ toast("Аккаунт создан");
 }
 
-function getUser(){return localStorage.getItem('currentUser');}
-function isAdmin(){return getUser()===ADMIN_LOGIN;}
+function login(){
+ let nick=loginNick.value;
+ let pass=loginPass.value;
 
+ let users=getLS('users',[]);
+
+ // админ
+ if(nick===ADMIN_LOGIN && pass===ADMIN_PASS){
+  localStorage.setItem('currentUser',nick);
+  location='index.html';
+  return;
+ }
+
+ let user=users.find(u=>u.nick===nick && u.pass===pass);
+
+ if(!user) return toast("Неверные данные");
+
+ localStorage.setItem('currentUser',nick);
+ location='index.html';
+}
+
+function getUser(){
+ return localStorage.getItem('currentUser');
+}
+
+function isAdmin(){
+ return getUser()===ADMIN_LOGIN;
+}
+
+// ===== ADMIN ACCESS =====
 if(location.pathname.includes('admin') && !isAdmin()){
  location='login.html';
 }
 
-// CABINET
+// ===== CABINET =====
 let form=document.getElementById('appForm');
 if(form){
  form.onsubmit=e=>{
@@ -68,11 +98,11 @@ if(form){
   });
 
   setLS('apps',apps);
-  toast("Отправлено");
+  toast("Заявка отправлена");
  };
 }
 
-// ADMIN
+// ===== ADMIN =====
 function render(){
  let apps=getLS('apps',[]);
  let members=getLS('members',[]);
@@ -81,7 +111,7 @@ function render(){
  if(appsEl){
   appsEl.innerHTML=apps.map((a,i)=>`
    <div class="card">
-    ${a.nick}<br>
+    <b>${a.nick}</b><br>
     lvl:${a.level}<br>
     ${a.msg}<br>
     <button onclick="accept(${i})">✔</button>
@@ -94,7 +124,7 @@ function render(){
  if(membersEl){
   membersEl.innerHTML=members.map((m,i)=>`
    <div>${m.nick}
-    <button onclick="removeM(${i})">X</button>
+    <button onclick="removeM(${i})">❌</button>
    </div>
   `).join('');
  }
@@ -126,35 +156,56 @@ function removeM(i){
  render();
 }
 
-// GARAGE
+// ===== GARAGE =====
 function addCar(){
+ if(!isAdmin()) return toast("Нет доступа");
+
  let file=carImage.files[0];
  let name=carName.value;
- if(!file||!name) return toast("Заполни всё");
+
+ if(!file || !name) return toast("Заполни всё");
 
  let reader=new FileReader();
+
  reader.onload=()=>{
   let g=getLS('garage',[]);
+
   g.push({name,img:reader.result});
   setLS('garage',g);
+
   renderGarage();
  };
+
  reader.readAsDataURL(file);
 }
 
+// 🔥 УДАЛЕНИЕ МАШИНЫ
+function removeCar(i){
+ let g=getLS('garage',[]);
+
+ g.splice(i,1);
+ setLS('garage',g);
+
+ toast("Удалено");
+ renderGarage();
+}
+
+// отображение
 function renderGarage(){
  let g=getLS('garage',[]);
  let el=document.getElementById('garage');
  if(!el) return;
 
- el.innerHTML=g.map(c=>`
+ el.innerHTML=g.map((c,i)=>`
   <div class="card">
    ${c.name}
    <img src="${c.img}" class="preview-img">
+   <button onclick="removeCar(${i})">Удалить</button>
   </div>
  `).join('');
 }
 
+// публичный автопарк
 function renderPublicGarage(){
  let g=getLS('garage',[]);
  let el=document.getElementById('publicGarage');
@@ -168,7 +219,7 @@ function renderPublicGarage(){
  `).join('');
 }
 
-// GAME
+// ===== GAME =====
 let lastClick=0;
 function clickMoney(){
  let now=Date.now();
@@ -198,12 +249,13 @@ function renderLeaderboard(){
 }
 
 function resetLeaderboard(){
- if(!isAdmin()) return;
+ if(!isAdmin()) return toast("Нет доступа");
+
  localStorage.removeItem('lb');
  renderLeaderboard();
 }
 
-// INIT
+// ===== INIT =====
 render();
 renderGarage();
 renderPublicGarage();
