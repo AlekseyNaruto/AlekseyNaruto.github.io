@@ -1,166 +1,35 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Vortex Squad Admin</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Orbitron:wght@500&display=swap" rel="stylesheet">
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin</title>
 
-<style>
-:root { --gold:#F5AF19; --glass:rgba(255,255,255,0.06); }
-body{margin:0;font-family:Inter;background:#0b0b0b;color:#fff}
-header{display:flex;justify-content:space-between;padding:20px;border-bottom:1px solid #222}
-.logo{font-family:Orbitron;color:var(--gold)}
-.container{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px;padding:20px}
-.card{background:var(--glass);backdrop-filter:blur(10px);padding:15px;border-radius:12px;border-left:3px solid var(--gold)}
-button{cursor:pointer;margin:3px}
-#toast-container{position:fixed;bottom:20px;right:20px}
-.toast{background:#111;padding:10px;margin-top:10px;border-left:3px solid var(--gold)}
-</style>
+<link rel="stylesheet" href="style.css">
 </head>
+
 <body>
 
-<header>
-<div class="logo">ADMIN PANEL</div>
-<button onclick="logout()">Выйти</button>
-</header>
+<div class="panel">
+  <h2>Заявки</h2>
+  <div id="apps"></div>
 
-<div class="container">
+  <h2>Состав</h2>
+  <div id="members"></div>
 
-<div class="card">
-<h3><i class="fa fa-inbox"></i> Заявки</h3>
-<div id="appsList"></div>
-</div>
+  <h2>Ивенты</h2>
 
-<div class="card">
-<h3><i class="fa fa-users"></i> Состав</h3>
-<div id="membersList"></div>
-</div>
+  <input id="eventName" placeholder="Название">
+  <input id="eventDate" type="date">
+  <input id="eventDesc" placeholder="Описание">
 
-<div class="card">
-<h3><i class="fa fa-calendar"></i> Ивенты</h3>
-<input id="eventName" placeholder="Название">
-<input id="eventDate" type="datetime-local">
-<textarea id="eventDesc" placeholder="Описание"></textarea>
-<button onclick="createEvent()">Создать</button>
-<div id="eventsList"></div>
-</div>
+  <button onclick="createEvent()" class="btn">Создать</button>
 
+  <div id="events"></div>
 </div>
 
 <div id="toast-container"></div>
 
-<script>
-// защита
-if(localStorage.getItem('isAdmin')!=='true'){
-  alert('Нет доступа');
-  window.location.href='index.html';
-}
-
-function logout(){
-  localStorage.removeItem('isAdmin');
-  window.location.href='index.html';
-}
-
-function toast(t){
- let el=document.createElement('div');
- el.className='toast';
- el.innerText=t;
- document.getElementById('toast-container').appendChild(el);
- setTimeout(()=>el.remove(),3000);
-}
-
-function loadData(k){return JSON.parse(localStorage.getItem(k))||[]}
-function saveData(k,d){localStorage.setItem(k,JSON.stringify(d))}
-
-function render(){
- let apps=loadData('BR_Haifamily_apps');
- let members=loadData('BR_Haifamily_members');
- let events=loadData('BR_Haifamily_events');
-
- // заявки
- appsList.innerHTML='';
- apps.forEach((a,i)=>{
-  let el=document.createElement('div');
-  el.innerHTML=`${a.nick} (${a.rank})<br>${a.message}`;
-
-  let ok=document.createElement('button');
-  ok.innerText='✔';
-  ok.onclick=()=>{
-    members.push({...a,date:new Date().toLocaleString()});
-    apps.splice(i,1);
-    saveData('BR_Haifamily_members',members);
-    saveData('BR_Haifamily_apps',apps);
-    toast('Принят');
-    render();
-  };
-
-  let no=document.createElement('button');
-  no.innerText='✖';
-  no.onclick=()=>{
-    apps.splice(i,1);
-    saveData('BR_Haifamily_apps',apps);
-    toast('Отклонен');
-    render();
-  };
-
-  el.append(ok,no);
-  appsList.appendChild(el);
- });
-
- // состав
- membersList.innerHTML='';
- members.forEach((m,i)=>{
-  let el=document.createElement('div');
-  el.innerText=m.nick+' ('+m.rank+')';
-
-  let del=document.createElement('button');
-  del.innerText='Удалить';
-  del.onclick=()=>{
-    members.splice(i,1);
-    saveData('BR_Haifamily_members',members);
-    toast('Исключен');
-    render();
-  };
-
-  el.appendChild(del);
-  membersList.appendChild(el);
- });
-
- // ивенты
- eventsList.innerHTML='';
- events.forEach((e,i)=>{
-  let el=document.createElement('div');
-  el.innerHTML=`${e.name}<br>${e.date}`;
-
-  let notify=document.createElement('button');
-  notify.innerText='Оповестить';
-  notify.onclick=()=>toast('Ивент: '+e.name);
-
-  let del=document.createElement('button');
-  del.innerText='Удалить';
-  del.onclick=()=>{
-    events.splice(i,1);
-    saveData('BR_Haifamily_events',events);
-    render();
-  };
-
-  el.append(notify,del);
-  eventsList.appendChild(el);
- });
-}
-
-function createEvent(){
- let events=loadData('BR_Haifamily_events');
- events.push({name:eventName.value,date:eventDate.value,desc:eventDesc.value});
- saveData('BR_Haifamily_events',events);
- toast('Ивент создан');
- render();
-}
-
-render();
-</script>
-
+<script src="app.js"></script>
 </body>
 </html>
