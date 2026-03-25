@@ -1,47 +1,34 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html>
 <head>
 <meta charset="UTF-8">
-<title>Кабинет</title>
-
 <link rel="stylesheet" href="style.css">
-
-<!-- Шрифты -->
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600&family=Inter&display=swap" rel="stylesheet">
-
 </head>
 <body>
 
 <div class="panel">
 
-  <h2>👤 Личный кабинет</h2>
+<h2>👤 Кабинет</h2>
 
-  <!-- ===== ЗАЯВКА ===== -->
-  <h3>📥 Подать заявку</h3>
+<form id="appForm">
+ <input id="level" placeholder="Уровень">
+ <textarea id="msg" placeholder="О себе"></textarea>
+ <button class="btn">Подать заявку</button>
+</form>
 
-  <form id="appForm">
-    <input id="level" placeholder="Уровень">
-    <textarea id="msg" placeholder="О себе"></textarea>
-    <button class="btn">Отправить заявку</button>
-  </form>
+<hr>
 
-  <hr style="margin:20px 0; border-color:#333;">
+<h2>💬 Чат с админом</h2>
 
-  <!-- ===== ЧАТ ===== -->
-  <h3>💬 Чат с админом</h3>
+<div id="chatBox" class="chat-box"></div>
 
-  <div id="chatBox" class="chat-box">
-    <!-- сюда подгружаются сообщения -->
-  </div>
-
-  <input id="chatInput" placeholder="Введите сообщение...">
-  <button class="btn" onclick="sendMessage()">Отправить</button>
+<input id="chatInput" placeholder="Сообщение">
+<button class="btn" onclick="sendMessage()">Отправить</button>
 
 </div>
 
 <div id="toast-container"></div>
 
 <script src="app.js"></script>
-
 </body>
 </html>
