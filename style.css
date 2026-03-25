@@ -1,119 +1,65 @@
-body{
-  margin:0;
-  font-family:Inter;
-  background:#0a0a0a;
-  color:#fff;
+/* === GTA PANEL STYLE === */
+.panel{
+  max-width:420px;
+  margin:60px auto;
+  padding:25px;
+
+  background:rgba(15,15,15,0.7);
+  backdrop-filter:blur(20px);
+
+  border:1px solid rgba(245,175,25,0.3);
+  border-radius:20px;
+
+  box-shadow:
+    0 0 20px rgba(245,175,25,0.2),
+    inset 0 0 10px rgba(245,175,25,0.1);
+
+  animation:fadeUp .6s ease;
 }
 
-/* HERO */
-.hero{
-  height:100vh;
-  background:url('https://images.unsplash.com/photo-1502877338535-766e1452684a') center/cover;
-  position:relative;
+/* === ANIMATIONS === */
+@keyframes fadeUp{
+  from{
+    opacity:0;
+    transform:translateY(40px);
+  }
+  to{
+    opacity:1;
+    transform:translateY(0);
+  }
 }
-.overlay{
+
+/* === INPUT GTA STYLE === */
+input,textarea{
+  background:#111;
+  color:#fff;
+  border:1px solid rgba(255,255,255,0.1);
+  transition:.3s;
+}
+
+input:focus,textarea:focus{
+  border-color:#F5AF19;
+  box-shadow:0 0 10px #F5AF19;
+  outline:none;
+}
+
+/* === BUTTON PRO === */
+.btn{
+  position:relative;
+  overflow:hidden;
+}
+
+.btn::after{
+  content:'';
   position:absolute;
   width:100%;
   height:100%;
-  background:rgba(0,0,0,.7);
-}
-.hero-content{
-  position:relative;
-  top:50%;
-  transform:translateY(-50%);
-  text-align:center;
-}
-h1{
-  font-family:Orbitron;
-  font-size:60px;
-  color:#F5AF19;
-  text-shadow:0 0 20px #F5AF19;
+  top:0;
+  left:-100%;
+  background:linear-gradient(120deg,transparent,rgba(255,255,255,0.4),transparent);
+  transition:.5s;
 }
 
-/* BUTTONS */
-.btn{
-  padding:12px 25px;
-  background:linear-gradient(45deg,#F5AF19,#ffcc33);
-  border:none;
-  border-radius:10px;
-  color:#000;
-  cursor:pointer;
-  transition:.3s;
-}
-.btn:hover{
-  box-shadow:0 0 20px #F5AF19;
-  transform:scale(1.05);
-}
-.btn.outline{
-  background:transparent;
-  color:#F5AF19;
-  border:1px solid #F5AF19;
-}
-
-/* CARDS */
-.cards{
-  display:flex;
-  justify-content:center;
-  gap:20px;
-  padding:50px;
-  flex-wrap:wrap;
-}
-.card{
-  background:rgba(255,255,255,.05);
-  backdrop-filter:blur(10px);
-  padding:20px;
-  border-radius:15px;
-  width:250px;
-  text-align:center;
-  transition:.3s;
-}
-.card:hover{
-  transform:translateY(-10px);
-  box-shadow:0 0 20px #F5AF19;
-}
-
-/* PANEL */
-.panel{
-  max-width:400px;
-  margin:50px auto;
-  background:rgba(255,255,255,.05);
-  padding:20px;
-  border-radius:15px;
-  backdrop-filter:blur(10px);
-}
-
-/* INPUTS */
-input,textarea{
-  width:100%;
-  margin:10px 0;
-  padding:10px;
-  border-radius:8px;
-  border:none;
-}
-
-/* TOAST */
-#toast-container{
-  position:fixed;
-  bottom:20px;
-  right:20px;
-}
-.toast{
-  background:#111;
-  padding:10px 20px;
-  margin-top:10px;
-  border-left:4px solid #F5AF19;
-  border-radius:8px;
-  animation:fadeIn .5s;
-}
-@keyframes fadeIn{
-  from{opacity:0;transform:translateX(100px)}
-  to{opacity:1;transform:translateX(0)}
-}
-
-/* ADAPTIVE */
-@media(max-width:950px){
-  .cards{
-    flex-direction:column;
-    align-items:center;
-  }
+.btn:hover::after{
+  left:100%;
 }
